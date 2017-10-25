@@ -48,7 +48,8 @@ iap封装库
             }
             case VERIFY_RECEIPT_RESULT:
             {
-                /***iap收据验证结果,  请参考Apple开发文档                  https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Chapters/ValidateRemotely.html
+                /***iap收据验证结果,  请参考Apple开发文档 
+                https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Chapters/ValidateRemotely.html
                 **/
                 if (status == 0){
                     // 验证成功, 发货
@@ -64,6 +65,7 @@ iap封装库
             case ErrorPaymentInvalid:
             case ErrorStoreProductNotAvailable:
             {
+                NSLog(@" error: %@ ！",params);
                 break;
             }
             case ErrorPaymentCancelled:{
