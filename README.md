@@ -4,7 +4,7 @@ iap封装库
 
 ##使用方式
 
-1. 修改PodFile，platform请支持ios9.0及以上， `pod 'ez_iap'`
+1. cocoapods， `pod 'ez_iap'`
 
 2. 
 ```
