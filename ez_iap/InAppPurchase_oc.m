@@ -183,7 +183,8 @@
 
 - (void) failedTransaction: (SKPaymentTransaction *)transaction{
     NSError *error = transaction.error;
-    NSLog(@"failedTransaction errorCode:%ld; msg:%@",transaction.error.code,[error localizedDescription]);
+    long code =transaction.error.code;
+    NSLog(@"failedTransaction errorCode:%ld; msg:%@",code,[error localizedDescription]);
     switch (transaction.error.code) {
         case SKErrorPaymentCancelled:
         {
