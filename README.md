@@ -4,20 +4,17 @@ iap封装库
 
 ##使用方式
 
-1. 修改PodFile，platform请支持ios9.0及以上， `pod 'ez_iap'`
+1. cocoapods `pod 'ez_iap'` , 支持ios8.0及以上
 
-2. 
+2. 引入头文件
 ```
 #import <ez_iap/IAPDefine.h>
 #import <ez_iap/IAPApi.h>
 ```
 
-3. 
+3. 初始化设置IAP回调监听
 ```
-
-
-
-    // 设置IAP事件回调
+   // 设置IAP事件回调
     [[IAPApi Instance] setMessageHandler:^(int code, NSString *params) {
         NSLog(@"IAPEvent %d  %@",code);
         switch (code) {
@@ -31,7 +28,7 @@ iap封装库
                   receipt:"xxxxxxx"
                }
                */
-               // 建议服务器做收据校验，如果你想用客户端来验证收据（单机），请调用以下方法, 第二个参数表示是否用沙箱验证，此处填NO
+               // 建议服务器做收据校验，如果你想用客户端来验证收据（如单机游戏app），请调用以下方法, 第二个参数表示是否用沙箱验证，此处填NO
                [[IAPApi Instance] verifyReceipt:{receipt} andDebug:NO];
                break;
             }
@@ -47,17 +44,15 @@ iap封装库
                  }
                ]
                */
-               
                break;
             }
             case VERIFY_RECEIPT_RESULT:
             {
-                /***iap收据验证结果,  请参考Apple开发文档                  https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Chapters/ValidateRemotely.html
-                *
+                /***iap收据验证结果,  请参考Apple开发文档 
+                https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Chapters/ValidateRemotely.html
                 **/
                 if (status == 0){
                     // 验证成功, 发货
-                    
                     return;
                 }
                 if (status == 21007){
@@ -70,6 +65,7 @@ iap封装库
             case ErrorPaymentInvalid:
             case ErrorStoreProductNotAvailable:
             {
+                NSLog(@" error: %@ ！",params);
                 break;
             }
             case ErrorPaymentCancelled:{
@@ -79,19 +75,52 @@ iap封装库
             default:
             break;
         }
-    }];
+    }];
+```
 
+4. 发起购买请求
+```
 /**
  * 购买，购买结果在setMessageHandler里处理
  * @param product 购买产品id
  * @param billNo 订单号
  **/
-[[IAPApi Instance] buy:{productId} billNo:{订单号}];
+[[IAPApi Instance] buy:{productId} billNo:{billNo}];
 
+```
+
+5. 获取itunestore后台产品列表
+```
 /**
  * 获取App Store的产品列表，结果在setMessageHandler里处理
- * @param productIds 产品id数组
+ * @param productArray 产品id数组
  **/
 [[IAPApi Instance] getCanBuyProductList:{productArray}];
 
 ```
+
+## 说明： 对于json字符串处理，我推荐用iOS Foundation框架库提供的`NSJSONSerialization`类处理，无需再次引入第三方的json解析库！
+
+> 以下提供一个json字符串解析的方法
+
+```
++(id)parseJSON:(NSString *)jsonString
+{
+    NSData *jsonData= [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    if (jsonData == nil){
+        NSLog(@"Error: NSString->NSData错误：%@",jsonString);
+        return nil;
+    }
+    NSError *error = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:&error];
+    if (jsonObject != nil && error == nil) {
+        return jsonObject;
+    } else {
+        NSLog(@"Error: json解析错误：%@",error);
+        return nil;
+    }
+}
+```
+
+
+ihowe@outlook.com  2017/10/25
