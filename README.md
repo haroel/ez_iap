@@ -7,10 +7,14 @@ iap封装库
 1. 修改PodFile，platform请支持ios9.0及以上， `pod 'ez_iap'`
 
 2. 
-
 ```
 #import <ez_iap/IAPDefine.h>
 #import <ez_iap/IAPApi.h>
+```
+
+3. 
+```
+
 
 
     // 设置IAP事件回调
