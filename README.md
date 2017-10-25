@@ -4,7 +4,7 @@ iap封装库
 
 ##使用方式
 
-1. cocoapods  `pod 'ez_iap'`
+1. cocoapods `pod 'ez_iap'` , 支持ios8.0及以上
 
 2. 引入头文件
 ```
@@ -28,7 +28,7 @@ iap封装库
                   receipt:"xxxxxxx"
                }
                */
-               // 建议服务器做收据校验，如果你想用客户端来验证收据（单机），请调用以下方法, 第二个参数表示是否用沙箱验证，此处填NO
+               // 建议服务器做收据校验，如果你想用客户端来验证收据（如单机游戏app），请调用以下方法, 第二个参数表示是否用沙箱验证，此处填NO
                [[IAPApi Instance] verifyReceipt:{receipt} andDebug:NO];
                break;
             }
@@ -98,3 +98,29 @@ iap封装库
 [[IAPApi Instance] getCanBuyProductList:{productArray}];
 
 ```
+
+## 说明： 对于json字符串处理，我推荐用iOS Foundation框架库提供的`NSJSONSerialization`类处理，无需再次引入第三方的json解析库！
+
+> 以下提供一个json字符串解析的方法
+
+```
++(id)parseJSON:(NSString *)jsonString
+{
+    NSData *jsonData= [jsonString dataUsingEncoding:NSUTF8StringEncoding];
+    if (jsonData == nil){
+        NSLog(@"Error: NSString->NSData错误：%@",jsonString);
+        return nil;
+    }
+    NSError *error = nil;
+    id jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:&error];
+    if (jsonObject != nil && error == nil) {
+        return jsonObject;
+    } else {
+        NSLog(@"Error: json解析错误：%@",error);
+        return nil;
+    }
+}
+```
+
+
+ihowe@outlook.com  2017/10/25
