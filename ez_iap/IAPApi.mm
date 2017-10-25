@@ -112,28 +112,32 @@ static IAPApi *_shareIap = nil;
     [storeRequest setHTTPMethod:@"POST"];
     [storeRequest setHTTPBody:requestData];
     // Make a connection to the iTunes Store on a background queue.
-    NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-    [NSURLConnection sendAsynchronousRequest:storeRequest queue:queue
-                           completionHandler:^(NSURLResponse *response, NSData *data, NSError *connectionError)
-                            {
-                               if (connectionError) {
-                                   /* ... Handle error ... */
-                                   NSLog(@"[IAPApi] 验证connectionError :%@",connectionError);
-                               } else {
-                                   NSString * str  =[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                                   NSError *error;
-                                   NSDictionary *jsonResponse = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-                                   if (!jsonResponse) {
-                                       /* ... Handle error ...*/
-                                       NSLog(@"[IAPApi] 验证错误:%@",error);
-                                       messageHandler(ErrorVerifyReceipt,str);
-                                       return;
-                                   }
-                                   /* ... Send a response back to the device ... */
-                                   NSLog(@"[IAPApi] 验证结果 :%@",str);
-                                   messageHandler(VERIFY_RECEIPT_RESULT,str);
-                               }
-                           }];
+    NSURLSession *session = [NSURLSession sharedSession];
+    NSURLSessionDataTask *task = [session dataTaskWithRequest:storeRequest
+                                            completionHandler:
+                                  ^(NSData *data, NSURLResponse *response, NSError *error) {
+                                      // ...
+                                      if (error) {
+                                          /* ... Handle error ... */
+                                          NSLog(@"[IAPApi] 验证connectionError :%@",error);
+                                      } else {
+                                          NSString * str  =[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                                          NSError *error;
+                                          NSDictionary *jsonResponse = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+                                          if (!jsonResponse) {
+                                              /* ... Handle error ...*/
+                                              NSLog(@"[IAPApi] 验证错误:%@",error);
+                                              messageHandler(ErrorVerifyReceipt,str);
+                                              return;
+                                          }
+                                          /* ... Send a response back to the device ... */
+                                          NSLog(@"[IAPApi] 验证结果 :%@",str);
+                                          messageHandler(VERIFY_RECEIPT_RESULT,str);
+                                      }
+                                      
+                                  }];
+    
+    [task resume];
 }
 
 -(void)dealloc{
