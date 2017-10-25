@@ -2,7 +2,7 @@
 
 iap封装库
 
-##使用方式
+## GET STARTED
 
 1. cocoapods `pod 'ez_iap'` , 支持ios8.0及以上
 
@@ -16,7 +16,7 @@ iap封装库
 ```
    // 设置IAP事件回调
     [[IAPApi Instance] setMessageHandler:^(int code, NSString *params) {
-        NSLog(@"IAPEvent %d  %@",code);
+        NSLog(@"IAPEvent %d",code);
         switch (code) {
             case IAPPAY_SUCCESS:
             {
@@ -52,7 +52,7 @@ iap封装库
                 https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Chapters/ValidateRemotely.html
                 **/
                 if (status == 0){
-                    // 验证成功, 发货
+                    // 验证成功, 处理发货
                     return;
                 }
                 if (status == 21007){
@@ -99,7 +99,7 @@ iap封装库
 
 ```
 
-## 说明： 对于json字符串处理，我推荐用iOS Foundation框架库提供的`NSJSONSerialization`类处理，无需再次引入第三方的json解析库！
+## 说明： 对于json字符串处理，推荐用iOS Foundation框架库提供的原生`NSJSONSerialization`类处理，功能全面，无需再次引入第三方的json解析库！
 
 > 以下提供一个json字符串解析的方法
 
@@ -121,6 +121,6 @@ iap封装库
     }
 }
 ```
-
+enjoy！
 
 ihowe@outlook.com  2017/10/25
