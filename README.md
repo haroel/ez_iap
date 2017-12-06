@@ -4,7 +4,7 @@ iap封装库
 
 ## GET STARTED
 
-1. cocoapods `pod 'ez_iap'` , 支持ios8.0及以上
+1. 从github获取源码，或cocoapods `pod 'ez_iap'` , 支持ios8.0及以上
 
 2. 引入头文件
 ```
