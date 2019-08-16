@@ -1,18 +1,20 @@
 # ez_iap
 
-iap封装库
+A lib for iOS IAP
 
 ## GET STARTED
 
-1. 从github获取源码，或cocoapods `pod 'ez_iap'` , 支持ios8.0及以上
+1. git clone sourcecode or cocoapods（ `pod 'ez_iap'` ）, 支持ios8.0及以上
 
-2. 引入头文件
+2. import storekit.framework。
+
+3. 
 ```
 #import <ez_iap/IAPDefine.h>
 #import <ez_iap/IAPApi.h>
 ```
 
-3. 初始化设置IAP回调监听
+4. 初始化设置IAP回调监听
 ```
    // 设置IAP事件回调
     [[IAPApi Instance] setMessageHandler:^(int code, NSString *params) {
@@ -78,7 +80,7 @@ iap封装库
     }];
 ```
 
-4. 发起购买请求
+5. 发起购买请求
 ```
 /**
  * 购买，购买结果在setMessageHandler里处理
@@ -89,7 +91,7 @@ iap封装库
 
 ```
 
-5. 获取itunestore后台产品列表
+6. 获取itunestore后台产品列表
 ```
 /**
  * 获取App Store的产品列表，结果在setMessageHandler里处理
