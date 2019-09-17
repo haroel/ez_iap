@@ -56,7 +56,7 @@ static IAPApi *_shareIap = nil;
 {
     NSData *receipt = [NSData dataWithContentsOfURL:[[NSBundle mainBundle] appStoreReceiptURL]];
     NSString * productIdentifier = transaction.payment.productIdentifier;
-    NSString * billNO  =[[NSString alloc] initWithData:transaction.payment.requestData encoding:NSUTF8StringEncoding];
+    NSString * billNO  = transaction.payment.applicationUsername;
     
     NSLog(@"-----[IAPApi] SK支付完成 begin --------");
     NSLog(@"-----transactionIdentifier:%@",transaction.transactionIdentifier);
