@@ -125,4 +125,4 @@ A lib for iOS IAP
 ```
 enjoy！
 
-ihowe@outlook.com  2017/10/25
+ihowe@outlook.com  2019/9/17
