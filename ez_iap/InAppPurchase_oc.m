@@ -80,9 +80,7 @@
         SKMutablePayment *payment = [SKMutablePayment paymentWithProduct:cproduct];
         if (_billNo != nil){
             NSLog(@"[InAppPurchase_oc]订单号：%@",_billNo);
-            NSString *tempBillNo = [NSString stringWithString:_billNo];
-            payment.applicationUsername = _billNo
-//            payment.requestData = [tempBillNo dataUsingEncoding:NSUTF8StringEncoding];
+            payment.applicationUsername = _billNo;
         }
         NSLog(@"---------发送购买请求 %@------------",_productId);
         [[SKPaymentQueue defaultQueue] addPayment:payment];
