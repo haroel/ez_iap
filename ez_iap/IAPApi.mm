@@ -58,11 +58,11 @@ static IAPApi *_shareIap = nil;
     NSString * productIdentifier = transaction.payment.productIdentifier;
     NSString * billNO  = transaction.payment.applicationUsername;
     
-    NSLog(@"-----[IAPApi] SK支付完成 begin --------");
-    NSLog(@"-----transactionIdentifier:%@",transaction.transactionIdentifier);
-    NSLog(@"-----productIdentifier:%@",productIdentifier);
-    NSLog(@"-----订单号:%@",billNO);
-    NSLog(@"-----[IAPApi] SK支付完成 end --------");
+    NSLog(@"[EZ_IAP]-----finishPay begin --------");
+    NSLog(@"[EZ_IAP]-----transactionIdentifier:%@",transaction.transactionIdentifier);
+    NSLog(@"[EZ_IAP]-----productIdentifier:%@",productIdentifier);
+    NSLog(@"[EZ_IAP]-----billNO.:%@",billNO);
+    NSLog(@"[EZ_IAP]-----finishPay end --------");
     
     NSString *receiptStr = [receipt base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
     NSDictionary *retDict = [NSDictionary dictionaryWithObjectsAndKeys:productIdentifier,@"productIdentifier",
@@ -89,7 +89,7 @@ static IAPApi *_shareIap = nil;
  **/
 -(void) verifyReceipt:(NSString*)receiptStr andDebug:(BOOL)debug
 {
-    NSLog(@"------ 提示: 客户端验证收据, 建议服务器来做验证");
+    NSLog(@"[EZ_IAP]------ warn!, 你正在进行客户端验证收据, 建议服务器来做验证");
     // Create the JSON object that describes the request
     NSError *error;
     NSDictionary *requestContents = @{
@@ -132,7 +132,20 @@ static IAPApi *_shareIap = nil;
                                           }
                                           /* ... Send a response back to the device ... */
                                           NSLog(@"[IAPApi] 验证结果 :%@",str);
-                                          messageHandler(VERIFY_RECEIPT_RESULT,str);
+                                          NSNumber *status = jsonResponse[@"status"];
+                                          switch ([status intValue]) {
+                                              case 21007:
+                                                  NSLog(@"[IAPApi] verify result code: 21007,resend to sandbox env");
+                                                  [self verifyReceipt:receiptStr andDebug:YES];
+                                                  break;
+                                              case 21008:
+                                                  NSLog(@"[IAPApi] verify result code: 21008,resend to production env ");
+                                                  [self verifyReceipt:receiptStr andDebug:NO];
+                                                  break;
+                                              default:
+                                                  messageHandler(VERIFY_RECEIPT_RESULT,str);
+                                                  break;
+                                          }
                                       }
                                       
                                   }];

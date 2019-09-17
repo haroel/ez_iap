@@ -45,7 +45,7 @@
 
 -(void)RequestProductData:(NSString*)pid
 {
-    NSLog(@"---------请求对应的产品信息------------");
+    NSLog(@"[InAppPurchase_oc] ---------请求对应的产品信息------------");
     NSArray *productArray = [[NSArray alloc] initWithObjects:pid, nil];
     NSSet *nsset = [NSSet setWithArray:productArray];
     SKProductsRequest *request=[[SKProductsRequest alloc] initWithProductIdentifiers: nsset];
@@ -58,16 +58,16 @@
 {
     NSArray *myProduct = response.products;
     if ([response.invalidProductIdentifiers count] > 0){
-        NSLog(@"无效产品Product ID:%@",response.invalidProductIdentifiers);
+        NSLog(@"[InAppPurchase_oc] 无效产品Product ID:%@",response.invalidProductIdentifiers);
     }
-    NSLog(@"可用的产品付费数量: %lu", (unsigned long)[myProduct count]);
+    NSLog(@"[InAppPurchase_oc] 可用的产品付费数量: %lu", (unsigned long)[myProduct count]);
     SKProduct *cproduct = nil;
     for(SKProduct *product in myProduct){
 //        NSLog(@"SKProduct 描述信息%@", [product description]);
-        NSLog(@"产品标题 %@" , [product localizedTitle]);
-        NSLog(@"产品描述信息: %@" , [product localizedDescription]);
-        NSLog(@"价格: %@" , [product price]);
-        NSLog(@"Product id: %@" , [product productIdentifier]);
+        NSLog(@"[InAppPurchase_oc] 产品标题 %@" , [product localizedTitle]);
+        NSLog(@"[InAppPurchase_oc] 产品描述信息: %@" , [product localizedDescription]);
+        NSLog(@"[InAppPurchase_oc] 价格: %@" , [product price]);
+        NSLog(@"[InAppPurchase_oc] Product id: %@" , [product productIdentifier]);
         NSString *pId = [product productIdentifier];
         if (  _productId != nil && [_productId isEqualToString:pId] ){
             cproduct = product;
@@ -82,7 +82,7 @@
             NSLog(@"[InAppPurchase_oc]订单号：%@",_billNo);
             payment.applicationUsername = _billNo;
         }
-        NSLog(@"---------发送购买请求 %@------------",_productId);
+        NSLog(@"[InAppPurchase_oc] ---------发送购买请求 %@------------",_productId);
         [[SKPaymentQueue defaultQueue] addPayment:payment];
     }else if ( _productId == nil )
     {
@@ -99,29 +99,29 @@
             NSError *error;
             NSData * data = [NSJSONSerialization dataWithJSONObject:plistArray options:0 error:&error];
             NSString * jsonString = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
-            NSLog(@"skproducts info: %@",jsonString);
+            NSLog(@"[InAppPurchase_oc] skproducts info: %@",jsonString);
             [self.delegate productListCall:LIST_AVALIABLE andParams:jsonString];
         }
     }else{
-        NSLog(@"--------- 所选商品 %@ 无法购买，请检查itunesconnect后台------------", _productId );
+        NSLog(@" [InAppPurchase_oc] --------- 所选商品 %@ 无法购买，请检查itunesconnect后台------------", _productId );
         [self.delegate errorCall:ErrorStoreProductNotAvailable andErrorMsg:@"所选商品无法购买！"];
     }
 }
 
 //弹出错误信息
 - (void)request:(SKRequest *)request didFailWithError:(NSError *)error{
-    NSLog(@"-------弹出错误信息----------");
+    NSLog(@"-------[InAppPurchase_oc] 弹出错误信息----------");
     [self.delegate errorCall:ErrorPaymentError andErrorMsg:[error localizedDescription]];
 }
 
 -(void) requestDidFinish:(SKRequest *)request
 {
-    NSLog(@"----------反馈信息结束--------------");
+    NSLog(@"----------[InAppPurchase_oc] 反馈信息结束--------------");
 }
 
 -(void) PurchasedTransaction: (SKPaymentTransaction *)transaction
 {
-    NSLog(@"-----PurchasedTransaction----");
+    NSLog(@"-----[InAppPurchase_oc] PurchasedTransaction----");
     NSArray *transactions =[[NSArray alloc] initWithObjects:transaction, nil];
     [self paymentQueue:[SKPaymentQueue defaultQueue] updatedTransactions:transactions];
 }
@@ -129,43 +129,43 @@
 /**** 监听交易状态  ***/
 - (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transactions//交易结果
 {
-    NSLog(@"-----paymentQueue--------");
+    NSLog(@"-----[InAppPurchase_oc] paymentQueue--------");
     for (SKPaymentTransaction *transaction in transactions)
     {
         switch (transaction.transactionState)
         {
             case SKPaymentTransactionStatePurchased://交易完成
             {
-                NSLog(@"-----交易完成 --------");
+                NSLog(@"-----[InAppPurchase_oc] 交易完成 --------");
                 [self completeTransaction:transaction];
                 break;
             }
             case SKPaymentTransactionStateFailed://交易失败
             {
-                NSLog(@"-----交易失败 --------");
+                NSLog(@"-----[InAppPurchase_oc] 交易失败 --------");
                 [self failedTransaction:transaction];
                 break;
             }
             case SKPaymentTransactionStateRestored://已经购买过该商品
             {
-                NSLog(@"-----已经购买过该商品 --------");
+                NSLog(@"-----[InAppPurchase_oc]已经购买过该商品 --------");
                 [self restoreTransaction:transaction];
                 break;
             }
             case SKPaymentTransactionStatePurchasing:      //商品添加进列表
             {
-                NSLog(@"-----商品添加进列表 --------");
+                NSLog(@"-----[InAppPurchase_oc]商品添加进列表 --------");
                 break;
             }
             default:
-                NSLog(@"----- 交易状态 transactionState %ld--------",(long)transaction.transactionState);
+                NSLog(@"----- [InAppPurchase_oc]交易状态 transactionState %ld--------",(long)transaction.transactionState);
                 break;
         }
     }
 }
 - (void) completeTransaction: (SKPaymentTransaction *)transaction
 {
-    NSLog(@"-----completeTransaction--------");
+    NSLog(@"-----[InAppPurchase_oc] completeTransaction--------");
     [self.delegate finishPay:transaction];
     // Remove the transaction from the payment queue.
     [[SKPaymentQueue defaultQueue] finishTransaction: transaction];
@@ -177,29 +177,29 @@
 {
     [self.delegate finishPay:transaction];
     [[SKPaymentQueue defaultQueue] finishTransaction: transaction];
-    NSLog(@" 交易恢复处理");
+    NSLog(@"[InAppPurchase_oc] 交易恢复处理");
 }
 
 - (void) failedTransaction: (SKPaymentTransaction *)transaction{
     NSError *error = transaction.error;
     long code =transaction.error.code;
-    NSLog(@"failedTransaction errorCode:%ld; msg:%@",code,[error localizedDescription]);
+    NSLog(@"[InAppPurchase_oc] failedTransaction errorCode:%ld; msg:%@",code,[error localizedDescription]);
     switch (transaction.error.code) {
         case SKErrorPaymentCancelled:
         {
-            NSLog(@"-----取消支付--------");
+            NSLog(@"----- [InAppPurchase_oc] 取消支付--------");
             [self.delegate errorCall:ErrorPaymentCancelled andErrorMsg:[error localizedDescription]];
             break;
         }
         case SKErrorPaymentInvalid:
         {
-            NSLog(@"-----无效支付--------");
+            NSLog(@"-----[InAppPurchase_oc] 无效支付--------");
             [self.delegate errorCall:ErrorPaymentInvalid andErrorMsg:[error localizedDescription]];
             break;
         }
         case SKErrorPaymentNotAllowed:
         {
-            NSLog(@"-----不允许支付--------");
+            NSLog(@"-----[InAppPurchase_oc] 不允许支付--------");
             [self.delegate errorCall:ErrorPaymentNotAllowed andErrorMsg:[error localizedDescription]];
             break;
         }
@@ -214,14 +214,14 @@
 }
 #pragma mark connection delegate
 -(void) paymentQueueRestoreCompletedTransactionsFinished: (SKPaymentTransaction *)transaction{
-    NSLog(@"-------paymentQueue RestoreCompleted ----");
+    NSLog(@"------- [InAppPurchase_oc] paymentQueue RestoreCompleted ----");
 }
 
 -(void) paymentQueue:(SKPaymentQueue *) paymentQueue restoreCompletedTransactionsFailedWithError:(NSError *)error{
-    NSLog(@"-------paymentQueue----");
+    NSLog(@"-------[InAppPurchase_oc] paymentQueue----");
     if (error != nil){
         [self.delegate errorCall:ErrorRestoreTransactionsFailed andErrorMsg:[error localizedDescription]];
-        NSLog(@"ERROR:%@",error);
+        NSLog(@"[InAppPurchase_oc] ERROR:%@",error);
     }
 }
 
