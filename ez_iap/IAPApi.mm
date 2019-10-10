@@ -66,8 +66,9 @@ static IAPApi *_shareIap = nil;
     
     NSString *receiptStr = [receipt base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
     NSDictionary *retDict = [NSDictionary dictionaryWithObjectsAndKeys:productIdentifier,@"productIdentifier",
-                                                                     billNO,@"billNO",
-                                                                     receiptStr,@"receipt",nil];
+                             transaction.transactionIdentifier,@"transactionIdentifier",
+                                             billNO,@"billNO",
+                                             receiptStr,@"receipt",nil];
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:retDict options:0 error:nil];
     if (jsonData){
         // json字符串
