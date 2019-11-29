@@ -4,7 +4,7 @@ A lib for iOS IAP
 
 ## GET STARTED
 
-1. git clone sourcecode or cocoapods（ `pod 'ez_iap'` ）, 支持ios8.0及以上
+1. git clone sourcecode or cocoapods（ `pod 'ez_iap', :git => 'https://github.com/haroel/ez_iap.git'` ）, 支持ios8.0及以上
 
 2. import storekit.framework。
 
