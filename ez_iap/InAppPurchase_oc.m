@@ -15,6 +15,11 @@
 {
     //监听购买状态
     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+    NSArray<SKPaymentTransaction *> *arr = [[SKPaymentQueue defaultQueue] transactions];
+    for (SKPaymentTransaction *transaction in arr)
+    {
+        [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+    }
     _billNo = nil;
     _productId = nil;
 }
