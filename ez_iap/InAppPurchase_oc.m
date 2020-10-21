@@ -182,7 +182,7 @@
 {
     [self.delegate finishPay:transaction];
     [[SKPaymentQueue defaultQueue] finishTransaction: transaction];
-    NSLog(@"[InAppPurchase_oc] 交易恢复处理");
+    NSLog(@"[InAppPurchase_oc] restoreTransaction ");
 }
 
 - (void) failedTransaction: (SKPaymentTransaction *)transaction{
@@ -192,19 +192,19 @@
     switch (transaction.error.code) {
         case SKErrorPaymentCancelled:
         {
-            NSLog(@"----- [InAppPurchase_oc] 取消支付--------");
+            NSLog(@"----- [InAppPurchase_oc] SKErrorPaymentCancelled --------");
             [self.delegate errorCall:ErrorPaymentCancelled andErrorMsg:[error localizedDescription]];
             break;
         }
         case SKErrorPaymentInvalid:
         {
-            NSLog(@"-----[InAppPurchase_oc] 无效支付--------");
+            NSLog(@"-----[InAppPurchase_oc] SKErrorPaymentInvalid --------");
             [self.delegate errorCall:ErrorPaymentInvalid andErrorMsg:[error localizedDescription]];
             break;
         }
         case SKErrorPaymentNotAllowed:
         {
-            NSLog(@"-----[InAppPurchase_oc] 不允许支付--------");
+            NSLog(@"-----[InAppPurchase_oc] SKErrorPaymentNotAllowed --------");
             [self.delegate errorCall:ErrorPaymentNotAllowed andErrorMsg:[error localizedDescription]];
             break;
         }

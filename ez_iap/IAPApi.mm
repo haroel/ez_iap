@@ -36,6 +36,8 @@ static IAPApi *_shareIap = nil;
 }
 
 -(void)buy:(NSString*)product billNo:(NSString*)bNo{
+    NSString *iapLKey = [NSString stringWithFormat:@"eziap_%@",product];
+    [[NSUserDefaults standardUserDefaults] setObject:bNo forKey:iapLKey];
     [purchase_oc buy:product andBillNO:bNo];
 }
 
@@ -65,10 +67,25 @@ static IAPApi *_shareIap = nil;
     NSLog(@"[EZ_IAP]-----finishPay end --------");
     
     NSString *receiptStr = [receipt base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
-    NSDictionary *retDict = [NSDictionary dictionaryWithObjectsAndKeys:productIdentifier,@"productIdentifier",
-                             transaction.transactionIdentifier,@"transactionIdentifier",
-                                             billNO,@"billNO",
-                                             receiptStr,@"receipt",nil];
+    NSMutableDictionary *retDict = [NSMutableDictionary dictionary];
+    [retDict setObject:productIdentifier forKey:@"productIdentifier"];
+    [retDict setObject:transaction.transactionIdentifier forKey:@"transactionIdentifier"];
+    NSString *iapLKey = [NSString stringWithFormat:@"eziap_%@",productIdentifier];
+    if (billNO == nil){
+        billNO =[[NSUserDefaults standardUserDefaults] objectForKey:iapLKey];
+    }else{
+        [[NSUserDefaults standardUserDefaults] setObject:billNO forKey:iapLKey];
+    }
+    if(billNO != nil){
+        [retDict setObject:billNO forKey:@"billNO"];
+    }
+    [retDict setObject:receiptStr forKey:@"receipt"];
+
+
+//    NSDictionary *retDict = [NSDictionary dictionaryWithObjectsAndKeys:productIdentifier,@"productIdentifier",
+//                             transaction.transactionIdentifier,@"transactionIdentifier",
+//                                             billNO,@"billNO",
+//                                             receiptStr,@"receipt",nil];
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:retDict options:0 error:nil];
     if (jsonData){
         // json字符串
@@ -93,9 +110,11 @@ static IAPApi *_shareIap = nil;
     NSLog(@"[EZ_IAP]------ warn!, 你正在进行客户端验证收据, 建议服务器来做验证");
     // Create the JSON object that describes the request
     NSError *error;
-    NSDictionary *requestContents = @{
-                                      @"receipt-data": receiptStr
-                                      };
+    NSMutableDictionary *requestContents = [NSMutableDictionary dictionary];
+    [requestContents setObject:receiptStr forKey:@"receipt-data"];
+//    NSDictionary *requestContents = @{
+//                                      @"receipt-data": receiptStr
+//                                      };
     NSData *requestData = [NSJSONSerialization dataWithJSONObject:requestContents
                                                           options:0
                                                             error:&error];
