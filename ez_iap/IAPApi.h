@@ -8,22 +8,35 @@
 #import <Foundation/Foundation.h>
 #import "InAppPurchase_oc.h"
 
-typedef void(^IAPMessageHandler)(int code,NSString *params);
+@protocol EZIAPDelegate <NSObject>
 
-@interface IAPApi : NSObject<IAPProtocol>
+- (void) payResult:(NSDictionary*)payInfo;
+
+- (void) verifyResult:(NSString*)billNO andProductID:(NSString*)productID andResult:(NSDictionary*)verfyInfo;
+
+- (void) productList:(NSArray*)list;
+
+- (void) IAPFailed:(NSString*)billNO andProductID:(NSString*)productID widthError:(NSError*)error;
+@end
+
+
+@interface IAPApi : NSObject<IAPHandlerDelegate>
 {
     @private
     InAppPurchase_oc * purchase_oc;
-    @private
-    IAPMessageHandler messageHandler;
 }
+@property BOOL debugMode;
+
+@property BOOL islock;
+/**
+ * set auto verify payment receipt ( default false )
+ */
+@property BOOL autoVerify;
+
+@property(nonatomic, weak) id<EZIAPDelegate> delegate;
+
 +(IAPApi*)Instance;
 
-/**
- * 设置iap 回调block
- * @param callback 回调block
- **/
--(void)setMessageHandler:(IAPMessageHandler)callback;
 /**
  * 购买
  * @param product 购买产品id
@@ -35,13 +48,13 @@ typedef void(^IAPMessageHandler)(int code,NSString *params);
  * 获取App Store的产品列表
  * @param productIds 产品id数组
  **/
--(void)getCanBuyProductList:(NSArray *)productIds;
+-(void)getProductList:(NSArray *)productIds;
 
 /**
 * 本地验证收据
-* @param receiptStr IAP收据
+* @param verifyInfo 必须包含 receipt-data字段！
 * @param debug 是否用沙箱验证
 **/
--(void)verifyReceipt:(NSString*)receiptStr andDebug:(BOOL)debug;
+-(void)verifyReceipt:(NSString*) verifyInfo andDebug:(BOOL)debug withResultHandler: (void (^)(NSError* error,NSDictionary*response))resultHandler;
 
 @end
