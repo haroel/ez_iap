@@ -6,81 +6,85 @@ A lib for iOS IAP
 
 1. git clone sourcecode or cocoapods（ `pod 'ez_iap', :git => 'https://github.com/haroel/ez_iap.git'` ）, 支持ios8.0及以上
 
-2. import storekit.framework。
 
-3. 
+2. 初始化
+
 ```
-#import <ez_iap/IAPDefine.h>
 #import <ez_iap/IAPApi.h>
+
+
+
+    // 是否自动开启验证
+    [IAPApi Instance].autoVerify = YES;
+    
+    // 开启将看到更多日志
+	[IAPApi Instance].debugMode = YES;
+
+    [IAPApi Instance].delegate = self;
+
 ```
 
-4. 初始化设置IAP回调监听
+3. 设置delegate回调
+
 ```
-   // 设置IAP事件回调
-    [[IAPApi Instance] setMessageHandler:^(int code, NSString *params) {
-        NSLog(@"IAPEvent %d",code);
-        switch (code) {
-            case IAPPAY_SUCCESS:
+
+当前Objective-C 类需实现 <EZIAPDelegate>
+
+#pragma mark -
+#pragma mark EZIAPDelegate
+- (void) payResult:(NSDictionary*)payInfo{
+    // 支付成功，下一步需做订单校验，如果autoVerify = true，则自动完成
+    [self nativeEventHandler:@"pay_success" andParams:[JSONUtil stringify:payInfo]];
+}
+
+- (void) verifyResult:(NSString*)billNO andProductID:(NSString*)productID andResult:(NSDictionary*)verfyInfo{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:verfyInfo];
+    [dict setObject:billNO forKey:@"billNO"];
+    [dict setObject:productID forKey:@"productID"];
+    [self nativeEventHandler:@"verify_result" andParams:[JSONUtil stringify:dict]];
+}
+
+- (void) productList:(NSArray*)list{
+    [self nativeEventHandler:@"list_success" andParams:[JSONUtil stringify:list]];
+}
+
+- (void) IAPFailed:(NSString*)billNO andProductID:(NSString*)productID widthError:(NSError*)error{
+    NSMutableDictionary *ret = [NSMutableDictionary dictionary];
+    if (error){
+        NSLog(@"[PluginIAP] %@ %@ error = %@",productID,billNO,error);
+        NSString *desc = [error localizedDescription];
+        switch (error.code) {
+            case SKErrorPaymentCancelled:
             {
-               /**
-               * 支付成功，返回一个json字符串
-               {
-                  productIdentifier:"xxx",
-                  billNO:"xxxx",
-                  receipt:"xxxxxxx"
-               }
-               */
-               // 建议服务器做收据校验，如果你想用客户端来验证收据（如单机游戏app），请调用以下方法, 第二个参数表示是否用沙箱验证，此处填NO
-               [[IAPApi Instance] verifyReceipt:{receipt} andDebug:NO];
-               break;
-            }
-            case LIST_AVALIABLE:{
-               /**
-               * itunestore产品列表，返回一个json字符串数组
-               [
-                 {
-                    title:"xxx",
-                    description:"xxxx",
-                    price:"xxxxxxx",
-                    productid:"xxxxxxx"
-                 }
-               ]
-               */
-               break;
-            }
-            case VERIFY_RECEIPT_RESULT:
-            {
-                /***iap收据验证结果,  请参考Apple开发文档 
-                https://developer.apple.com/library/content/releasenotes/General/ValidateAppStoreReceipt/Chapters/ValidateRemotely.html
-                **/
-                if (status == 0){
-                    // 验证成功, 处理发货
-                    return;
-                }
-                if (status == 21007){
-                    [[IAPApi Instance] verifyReceipt:{receipt} andDebug:YES];
-                }
-                break;
-            }
-            case ErrorPaymentError:
-            case ErrorPaymentNotAllowed:
-            case ErrorPaymentInvalid:
-            case ErrorStoreProductNotAvailable:
-            {
-                NSLog(@" error: %@ ！",params);
+                desc = @"The payment has been cancelled.";
                 break;
             }
-            case ErrorPaymentCancelled:{
-                NSLog(@"user cancel！");
-                break;
+            case SKErrorPaymentInvalid:
+            {
+                desc = @"Purchase identifier was invalid.";
+                break;
+            }
+            case SKErrorStoreProductNotAvailable:
+            {
+                desc = @"Product is not available in the current storefront.";
+                break;
             }
             default:
-            break;
+                break;
         }
-    }];
+        [PluginCore alert:@"Message" andMsg:desc];
+        [ret setObject:desc forKey:@"msg"];
+    }
+    [ret setObject:billNO forKey:@"billNO"];
+    [ret setObject:productID forKey:@"productID"];
+    [self nativeEventHandler:@"pay_error" andParams:[JSONUtil stringify:ret]];
+}
+
 ```
 
+
 5. 发起购买请求
+
 ```
 /**
  * 购买，购买结果在setMessageHandler里处理
@@ -92,16 +96,38 @@ A lib for iOS IAP
 ```
 
 6. 获取itunestore后台产品列表
+
 ```
+
 /**
  * 获取App Store的产品列表，结果在setMessageHandler里处理
  * @param productArray 产品id数组
  **/
-[[IAPApi Instance] getCanBuyProductList:{productArray}];
+[[IAPApi Instance] getProductList:{productArray}];
 
 ```
 
-## 说明： 对于json字符串处理，推荐用iOS Foundation框架库提供的原生`NSJSONSerialization`类处理，功能全面，无需再次引入第三方的json解析库！
+
+
+7. 校验订单
+
+
+```
+
+
+IAPApi *api = [IAPApi Instance];
+        [api verifyReceipt:receiptStr andDebug:NO withResultHandler:^(NSError *error, NSDictionary *response) {
+            if (error){
+                [self nativeCallbackErrorHandler:callback andParams:[error localizedDescription] ];
+            }else{
+                [self nativeCallbackHandler:callback andParams:[JSONUtil stringify:response]];
+            }
+        }];
+        
+
+```
+
+说明： 对于json字符串处理，推荐用iOS Foundation框架库提供的原生`NSJSONSerialization`类处理，功能全面，无需再次引入第三方的json解析库！
 
 > 以下提供一个json字符串解析的方法
 
@@ -125,4 +151,4 @@ A lib for iOS IAP
 ```
 enjoy！
 
-ihowe@outlook.com  2019/9/17
+ihowe@outlook.com  2020/10/23
