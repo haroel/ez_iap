@@ -26,8 +26,8 @@ static IAPApi *_shareIap = nil;
 
 -(void) initIAP
 {
-    self.debugMode = false;
-    self.autoVerify = false;
+    self.debugMode = NO;
+    self.autoVerify = NO;
     self.islock = NO;
     self.delegate = nil;
     purchase_oc = [InAppPurchase_oc alloc];

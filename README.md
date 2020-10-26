@@ -1,51 +1,77 @@
 # ez_iap
 
-A lib for iOS IAP
-
-## GET STARTED
-
-1. git clone sourcecode or cocoapods（ `pod 'ez_iap', :git => 'https://github.com/haroel/ez_iap.git'` ）, 支持ios8.0及以上
+A simple lib for iOS IAP.
 
 
-2. 初始化
+# GET STARTED
+
+### 1. Add the following to your Podfile:
+
+`pod 'ez_iap'`
+
+
+
+### 2. Import the required header files
 
 ```
+
 #import <ez_iap/IAPApi.h>
 
 
+// Declare that the IAP delegate implements the EZIAPDelegate protocol.
+@interface PluginIAP : PluginBase<EZIAPDelegate>
 
-    // 是否自动开启验证
-    [IAPApi Instance].autoVerify = YES;
-    
-    // 开启将看到更多日志
+```
+
+
+### 3. Add IAPApi to you code
+
+```
+
+    // if YES, IAPApi will autoverfify the receipt,  default NO;
+    // Recommended use server authentication!
+	[IAPApi Instance].autoVerify = YES;
+	
+    // set to debugMode or not, default NO;
 	[IAPApi Instance].debugMode = YES;
-
-    [IAPApi Instance].delegate = self;
-
-```
-
-3. 设置delegate回调
+	
+	[IAPApi Instance].delegate = self;
 
 ```
 
-当前Objective-C 类需实现 <EZIAPDelegate>
 
+### 4. Implement the EZIAPDelegate protocol to handle the iap process by defining the following methods:
+
+
+```
 #pragma mark -
-#pragma mark EZIAPDelegate
+#pragma mark EZIAPDelegate 
 - (void) payResult:(NSDictionary*)payInfo{
-    // 支付成功，下一步需做订单校验，如果autoVerify = true，则自动完成
+
+	/**
+		payInfo = {
+			productID:"xxxx",
+			productIdentifier:"xxxx",     //same as ‘productID’
+			billNO:"zzzz",                // A billNO you send to IAP
+ 			transactionIdentifier:"yyyy", // appstore transactionIdentifier
+			receipt:"KKKKK",              // appstore payment receipt 
+		}
+	
+	*/
+    // If the payment is successful, the next step is to verify the order. 
+    // If autoverify = true, it will be completed automatically
     [self nativeEventHandler:@"pay_success" andParams:[JSONUtil stringify:payInfo]];
 }
 
 - (void) verifyResult:(NSString*)billNO andProductID:(NSString*)productID andResult:(NSDictionary*)verfyInfo{
-    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithDictionary:verfyInfo];
-    [dict setObject:billNO forKey:@"billNO"];
-    [dict setObject:productID forKey:@"productID"];
-    [self nativeEventHandler:@"verify_result" andParams:[JSONUtil stringify:dict]];
+	// receipt verify Result 
+	// Verfyinfo is the result of Apple's order， you can check the order status and paymentInfo;
+    
 }
 
 - (void) productList:(NSArray*)list{
-    [self nativeEventHandler:@"list_success" andParams:[JSONUtil stringify:list]];
+    // appleconnect payment list
+    
 }
 
 - (void) IAPFailed:(NSString*)billNO andProductID:(NSString*)productID widthError:(NSError*)error{
@@ -83,24 +109,25 @@ A lib for iOS IAP
 ```
 
 
-5. 发起购买请求
+### 5. Start pay
 
 ```
 /**
- * 购买，购买结果在setMessageHandler里处理
- * @param product 购买产品id
- * @param billNo 订单号
+ * request pay
+ * @param product productIdentifier
+ * @param billNO  you billNO （a string which can identify the user）
  **/
-[[IAPApi Instance] buy:{productId} billNo:{billNo}];
+[[IAPApi Instance] buy:{productId} billNo:{billNO}];
 
 ```
 
-6. 获取itunestore后台产品列表
+
+### 6. Get product list of app store
 
 ```
 
 /**
- * 获取App Store的产品列表，结果在setMessageHandler里处理
+ * Get product list of app store
  * @param productArray 产品id数组
  **/
 [[IAPApi Instance] getProductList:{productArray}];
@@ -108,12 +135,10 @@ A lib for iOS IAP
 ```
 
 
-
-7. 校验订单
+### 7. Verify Receipt
 
 
 ```
-
 
 IAPApi *api = [IAPApi Instance];
         [api verifyReceipt:receiptStr andDebug:NO withResultHandler:^(NSError *error, NSDictionary *response) {
@@ -127,28 +152,6 @@ IAPApi *api = [IAPApi Instance];
 
 ```
 
-说明： 对于json字符串处理，推荐用iOS Foundation框架库提供的原生`NSJSONSerialization`类处理，功能全面，无需再次引入第三方的json解析库！
-
-> 以下提供一个json字符串解析的方法
-
-```
-+(id)parseJSON:(NSString *)jsonString
-{
-    NSData *jsonData= [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-    if (jsonData == nil){
-        NSLog(@"Error: NSString->NSData错误：%@",jsonString);
-        return nil;
-    }
-    NSError *error = nil;
-    id jsonObject = [NSJSONSerialization JSONObjectWithData:jsonData options:0 error:&error];
-    if (jsonObject != nil && error == nil) {
-        return jsonObject;
-    } else {
-        NSLog(@"Error: json解析错误：%@",error);
-        return nil;
-    }
-}
-```
 enjoy！
 
-ihowe@outlook.com  2020/10/23
+ihowe@outlook.com  2020/10/26
